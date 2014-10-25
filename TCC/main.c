@@ -13,7 +13,7 @@
  * 
  */
 int main(int argc, char** argv) {
-    int alpha = 2, beta = 8, elements = 5, sum = 15;
+    int alpha = 2, beta = 10, elements = 5, sum = 15;
     
     set *sets = subset(alpha, beta, elements, sum);
     
