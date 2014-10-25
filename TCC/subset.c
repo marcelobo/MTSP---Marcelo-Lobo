@@ -27,9 +27,6 @@ void add_element_sets(set *dest, set *src, int add_element, int limit){
     
     
     if(aux_src != NULL){
-        if(limit == aux_src->count_elements){
-        
-        }
         aux_dest->count_elements = aux_src->count_elements + 1;
         aux_dest->elements = (int*) malloc(sizeof(int) * aux_dest->count_elements);
         memcpy(aux_dest->elements, aux_src->elements, sizeof(int) * aux_src->count_elements);
