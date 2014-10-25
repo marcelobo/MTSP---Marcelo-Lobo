@@ -12,21 +12,55 @@
 
 #define DEBUG
 
+#ifdef DEBUG
+    #define PRINT_COUNT_TABLE
+    #define PRINT_SETS_TABLE
+    #define PRINT_SOLUTION
+#endif
+
+void add_element_sets(set *dest, set *src, int add_element, int limit){
+    set *aux_dest, *aux_src;
+    
+    aux_dest = dest;
+    aux_src = src;
+    
+    
+    
+    if(aux_src != NULL){
+        if(limit == aux_src->count_elements){
+        
+        }
+        aux_dest->count_elements = aux_src->count_elements + 1;
+        aux_dest->elements = (int*) malloc(sizeof(int) * aux_dest->count_elements);
+        memcpy(aux_dest->elements, aux_src->elements, sizeof(int) * aux_src->count_elements);
+        *(aux_dest->elements + aux_dest->count_elements - 1) = add_element;
+        
+        aux_src = aux_src->next;
+        
+        while (aux_src != NULL) {
+            aux_dest->next = (set*) malloc(sizeof(set));
+            aux_dest = aux_dest->next;
+            aux_dest->count_elements = aux_src->count_elements;
+            aux_dest->elements = (int*) malloc(sizeof(int) * (aux_src->count_elements + 1));
+            memcpy(aux_dest->elements, aux_src->elements, sizeof(int) * aux_src->count_elements);
+            aux_dest->count_elements++;
+            *(aux_dest->elements + aux_dest->count_elements - 1) = add_element;
+            aux_src = aux_src->next;
+        }
+        
+        aux_dest->next = NULL;
+    }
+}
+
+
 //Copy a set into another pointer
-void copy_sets(set *dest, set *src, int add_element){
+void copy_sets(set *dest, set *src){
     set *aux_dest, *aux_src;
     
     if(src != NULL){
         dest->count_elements = src->count_elements;
-        if(add_element != 0){ //Adding an element to the set
-            dest->elements = (int*) malloc(sizeof(int) * (src->count_elements + 1));
-            memcpy(dest->elements, src->elements, sizeof(int) * src->count_elements);
-            dest->count_elements++;
-            *(dest->elements + dest->count_elements - 1) = add_element;
-        }else{
-            dest->elements = (int*) malloc(sizeof(int) * (src->count_elements));
-            memcpy(dest->elements, src->elements, sizeof(int) * src->count_elements);
-        }
+        dest->elements = (int*) malloc(sizeof(int) * (src->count_elements));
+        memcpy(dest->elements, src->elements, sizeof(int) * src->count_elements);
         aux_dest = dest;
         aux_src = src->next;
         
@@ -34,20 +68,12 @@ void copy_sets(set *dest, set *src, int add_element){
             aux_dest->next = (set*) malloc(sizeof(set));
             aux_dest = aux_dest->next;
             aux_dest->count_elements = aux_src->count_elements;
-            if(add_element != 0){
-                aux_dest->elements = (int*) malloc(sizeof(int) * (aux_src->count_elements + 1));
-                memcpy(aux_dest->elements, aux_src->elements, sizeof(int) * aux_src->count_elements);
-                aux_dest->count_elements++;
-                *(aux_dest->elements + aux_dest->count_elements - 1) = add_element;
-            }else{
-                aux_dest->elements = (int*) malloc(sizeof(int) * (aux_src->count_elements));
-                memcpy(aux_dest->elements, aux_src->elements, sizeof(int) * aux_src->count_elements);
-            }
+            aux_dest->elements = (int*) malloc(sizeof(int) * (aux_src->count_elements));
+            memcpy(aux_dest->elements, aux_src->elements, sizeof(int) * aux_src->count_elements);
             aux_src = aux_src->next;
         }
         
         aux_dest->next = NULL;
-
     }
 }
 //Remove sets from "list" where count_elements are different from "count"
@@ -109,7 +135,7 @@ set* subset( int min, int max, int limit, int sum){
                     *set_with_aj->elements = (min + j);
                 }else{
                     set_aux = sets_table[i - (min + j)][j];
-                    copy_sets(set_with_aj, set_aux, (min + j));
+                    add_element_sets(set_with_aj, set_aux, (min + j), limit);
                 }
             }else{
                 with_aj = 0;
@@ -124,7 +150,7 @@ set* subset( int min, int max, int limit, int sum){
                 set_without_aj = (set*) malloc(sizeof(set));
                 set_aux = sets_table[i][j - 1];
                 if(set_aux != NULL){
-                    copy_sets(set_without_aj, set_aux, 0);
+                    copy_sets(set_without_aj, set_aux);
                 }
             }else{
                 without_aj = 0;
@@ -159,7 +185,7 @@ set* subset( int min, int max, int limit, int sum){
         }
     }
     
-    #ifdef DEBUG
+    #ifdef PRINT_COUNT_TABLE
         printf("Count Table:\n");
         for(i = 0; i <= sum; i++){
             for(j = 0; j < interval; j++){
@@ -167,16 +193,19 @@ set* subset( int min, int max, int limit, int sum){
             }
             printf("\n");
         }
+        printf("\n");
+    #endif    
         
-        printf("\nSets Table:\n");
+    #ifdef PRINT_SETS_TABLE
+        printf("Sets Table:\n");
         int k;
         for(i = 0; i <= sum; i++){
-            printf("Soma = %d\n",i);
+            printf("Sum = i = %d\n",i);
             for(j = 0; j < interval; j++){
                 set_aux = sets_table[i][j];
                 aux = 1;
                 if(set_aux != NULL){
-                    printf("i: %d\t j: %d\n", i, j);
+                    printf("j: %d\n", j);
 
                     printf("Set %d\t Elements: %d\n", aux, set_aux->count_elements);
                     for(k = 0; k < set_aux->count_elements; k++){
@@ -186,7 +215,7 @@ set* subset( int min, int max, int limit, int sum){
                     printf("\n");
                     while(set_aux->next != NULL){
                         set_aux = set_aux->next;
-                        printf("Set %d:d\t Elements: %d\n", aux, set_aux->count_elements);
+                        printf("Set %d:\t Elements: %d\n", aux, set_aux->count_elements);
                         for(k = 0; k < set_aux->count_elements; k++){
                             printf("%4d",*(set_aux->elements +k));
                         }
@@ -204,23 +233,23 @@ set* subset( int min, int max, int limit, int sum){
     //Removing sets
     resp_set = remove_sets(sets_table[sum][interval - 1], limit);
     
-    #ifdef DEBUG
-        printf("Conjuntos possiveis:\n");
+    #ifdef PRINT_SOLUTION
+        printf("Possible Sets: \n");
         set_aux = resp_set;
-        k = 1;
+        j = 1;
         if(set_aux != NULL){
             while (set_aux != NULL){
-                printf("Set %d:\n", k);
+                printf("Set %d:\n", j);
                 for (i = 0; i < set_aux->count_elements; i++) {
                    printf("%4d",*(set_aux->elements + i));
 
                 }
                 set_aux = set_aux->next;
-                k++;
+                j++;
                 printf("\n");
             }
         }else{
-            printf("Nenhum conjunto encontrado.\n");
+            printf("0 sets found.\n");
         }
     #endif
     
