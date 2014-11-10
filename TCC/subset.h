@@ -13,6 +13,8 @@ struct set{
     set* next;
 };
 
+
+void add_element_sets(set *dest, set *src, int add_element);
 void copy_sets(set *dest, set *src);
 set* remove_sets(set *list, int count);
 set* subset( int min, int max, int limit, int sum);
